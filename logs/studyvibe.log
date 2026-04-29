@@ -91,3 +91,17 @@
 2026-04-28 22:51:21,589 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=0.50 n=1 total_ms=4.1
 2026-04-28 22:53:21,586 | INFO | studyvibe | pipeline ok section=student mood=deep_study confidence=0.50 n=5 total_ms=4.2
 2026-04-28 22:54:09,443 | INFO | studyvibe | pipeline ok section=personal mood=workout_gym confidence=1.00 n=5 total_ms=14.9
+2026-04-28 23:53:10,373 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=1.00 n=5 total_ms=7.7
+2026-04-28 23:53:21,644 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=1.00 n=5 total_ms=7.6
+2026-04-28 23:53:29,790 | INFO | studyvibe | pipeline ok section=personal mood=chill_unwind confidence=1.00 n=5 total_ms=5.9
+2026-04-29 00:12:03,765 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=1.00 n=3 total_ms=2.0
+2026-04-29 00:12:03,768 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=1.00 n=2 total_ms=1.5
+2026-04-29 00:12:03,775 | INFO | studyvibe | pipeline ok section=student mood=deep_study confidence=1.00 n=3 total_ms=3.0
+2026-04-29 00:12:03,782 | INFO | studyvibe | pipeline ok section=personal mood=workout_gym confidence=1.00 n=2 total_ms=3.0
+2026-04-29 00:12:03,784 | WARNING | studyvibe | pipeline guardrail layer=activity_allowlist msg=unknown section 'invalid'
+2026-04-29 00:12:03,793 | INFO | studyvibe | pipeline ok section=personal mood=chill_unwind confidence=1.00 n=2 total_ms=4.6
+2026-04-29 00:12:03,798 | INFO | studyvibe | pipeline ok section=work mood=deep_focus_coding confidence=0.50 n=2 total_ms=2.2
+2026-04-29 00:12:03,805 | INFO | studyvibe | pipeline ok section=work mood=email_triage confidence=0.00 n=1 total_ms=4.2
+2026-04-29 00:12:03,812 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=0.50 n=1 total_ms=2.7
+2026-04-29 00:12:03,814 | INFO | studyvibe | pipeline ok section=student mood=exam_cram confidence=0.50 n=1 total_ms=2.0
+2026-04-29 00:14:03,518 | INFO | studyvibe | pipeline ok section=work mood=email_triage confidence=0.00 n=5 total_ms=23.4

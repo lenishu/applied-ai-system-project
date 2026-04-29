@@ -4,68 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyVibe — Mood-Aware Music Recommender</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body>
+    <!-- Animated background -->
+    <div class="bg-aurora"></div>
+    <div class="bg-grain"></div>
+
+    <div class="container mx-auto px-4 py-10 relative z-10">
+
         <!-- Header -->
-        <div class="mb-12 text-center">
-            <h1 class="text-5xl font-bold text-gray-900 mb-3">🎵 StudyVibe</h1>
-            <p class="text-xl text-gray-600">Mood-Aware Music Recommender for Students & Workers</p>
-            <p class="text-sm text-gray-500 mt-2">Find the perfect playlist for what you're doing right now</p>
-        </div>
+        <header class="mb-12 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6 text-xs font-medium text-white/80 tracking-wide">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Rule-based · Deterministic · Transparent
+            </div>
+            <h1 class="hero-title">
+                Study<span class="gradient-text">Vibe</span>
+            </h1>
+            <p class="text-lg md:text-xl text-white/70 mt-3 font-light">
+                Mood-aware music for students &amp; workers
+            </p>
+            <p class="text-sm text-white/50 mt-2">
+                Tell us what you're doing — we'll find the soundtrack.
+            </p>
+        </header>
 
         <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
+
             <!-- Left: Input Panel -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">What are you doing?</h2>
+            <aside class="lg:col-span-2">
+                <div class="glass-card p-6 lg:sticky lg:top-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg shadow-lg shadow-indigo-500/30">
+                            ✨
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">What are you doing?</h2>
+                            <p class="text-xs text-white/50">Pick a mood or describe it</p>
+                        </div>
+                    </div>
 
                     <!-- Tabs for sections -->
-                    <div class="flex mb-6 border-b border-gray-200">
-                        <button
-                            class="tab-btn flex-1 py-2 px-4 text-center font-semibold text-gray-700 hover:text-blue-600 border-b-2 border-transparent transition"
-                            data-section="student"
-                        >
-                            📚 Student
+                    <div class="tab-bar mb-5">
+                        <button class="tab-btn" data-section="student">
+                            <span class="tab-icon">📚</span>
+                            <span class="tab-label">Student</span>
                         </button>
-                        <button
-                            class="tab-btn flex-1 py-2 px-4 text-center font-semibold text-gray-700 hover:text-blue-600 border-b-2 border-transparent transition"
-                            data-section="work"
-                        >
-                            💼 Work
+                        <button class="tab-btn" data-section="work">
+                            <span class="tab-icon">💼</span>
+                            <span class="tab-label">Work</span>
                         </button>
-                        <button
-                            class="tab-btn flex-1 py-2 px-4 text-center font-semibold text-gray-700 hover:text-blue-600 border-b-2 border-transparent transition"
-                            data-section="personal"
-                        >
-                            🎉 Personal
+                        <button class="tab-btn" data-section="personal">
+                            <span class="tab-icon">🌙</span>
+                            <span class="tab-label">Personal</span>
                         </button>
                     </div>
 
                     <!-- Mood buttons (dynamic) -->
-                    <div id="mood-buttons-container" class="mb-6 grid grid-cols-2 gap-2">
+                    <div id="mood-buttons-container" class="mood-grid mb-6">
                         <!-- Populated by JavaScript -->
                     </div>
 
                     <!-- Free text input -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Or describe what you're doing:</label>
+                    <div class="mb-5">
+                        <label class="form-label">
+                            <span class="opacity-90">Or describe what you're doing</span>
+                            <span class="text-white/40 text-[11px] font-normal">free-text</span>
+                        </label>
                         <textarea
                             id="free-text"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                            placeholder="e.g., studying for exam, coding sprint, gym workout..."
-                            rows="4"
+                            class="form-textarea"
+                            placeholder="e.g., cramming for finals, deep coding sprint, post-gym chill..."
+                            rows="3"
                         ></textarea>
                     </div>
 
                     <!-- Language and Era -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-3 mb-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Language:</label>
-                            <select id="language" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            <label class="form-label">Language</label>
+                            <select id="language" class="form-select">
                                 <option>English</option>
                                 <option>Nepali</option>
                                 <option>Spanish</option>
@@ -73,8 +97,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Era:</label>
-                            <select id="era" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            <label class="form-label">Era</label>
+                            <select id="era" class="form-select">
                                 <option>2026</option>
                                 <option>2025</option>
                                 <option>2020-25</option>
@@ -83,65 +107,86 @@
                         </div>
                     </div>
 
-                    <!-- Options -->
-                    <div class="mb-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="use-lastfm" checked class="rounded border-gray-300 text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700">Use online music database</span>
-                        </label>
-                    </div>
+                    <!-- Toggle: Online DB -->
+                    <label class="toggle-row mb-6">
+                        <span class="flex items-center gap-2">
+                            <span class="text-base">🌐</span>
+                            <span class="text-sm font-medium text-white/90">Use online music database</span>
+                        </span>
+                        <input type="checkbox" id="use-lastfm" checked class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
 
                     <!-- Submit button -->
-                    <button
-                        id="recommend-btn"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-105"
-                    >
-                        Get Recommendations
+                    <button id="recommend-btn" class="btn-primary">
+                        <span class="btn-shine"></span>
+                        <span class="relative flex items-center justify-center gap-2">
+                            <span>Get Recommendations</span>
+                            <span class="text-lg">→</span>
+                        </span>
                     </button>
                 </div>
-            </div>
+            </aside>
 
             <!-- Right: Results Panel -->
-            <div class="lg:col-span-2">
-                <div id="loading" class="hidden text-center py-12">
-                    <div class="inline-block">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                    </div>
-                    <p class="mt-4 text-gray-600">Finding your perfect playlist...</p>
-                </div>
-
-                <div id="results-container" class="hidden space-y-6">
-                    <!-- Recommendations Cards -->
-                    <div id="recommendations-list">
-                        <!-- Populated by JavaScript -->
-                    </div>
-
-                    <!-- Pipeline Steps (collapsible) -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <button
-                            id="pipeline-toggle"
-                            class="w-full flex items-center justify-between text-lg font-bold text-gray-900 hover:text-blue-600 transition"
-                        >
-                            <span>📊 Pipeline Steps</span>
-                            <span id="pipeline-chevron">▼</span>
-                        </button>
-                        <div id="pipeline-details" class="hidden mt-6 space-y-4">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- Error message (if any) -->
-                    <div id="error-message" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-                        <!-- Populated by JavaScript -->
-                    </div>
+            <main class="lg:col-span-3">
+                <!-- Loading state -->
+                <div id="loading" class="hidden glass-card p-12 text-center">
+                    <div class="loader-pulse mx-auto"></div>
+                    <p class="mt-6 text-white/80 font-medium">Finding your perfect playlist...</p>
+                    <p class="mt-1 text-white/50 text-sm">Running 5-step pipeline</p>
                 </div>
 
                 <!-- Initial empty state -->
-                <div id="empty-state" class="text-center py-12 bg-white rounded-lg shadow-lg">
-                    <p class="text-gray-500 text-lg">Select a mood or describe your activity to get started</p>
+                <div id="empty-state" class="glass-card p-12 text-center">
+                    <div class="text-6xl mb-4 opacity-60">🎧</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Ready when you are</h3>
+                    <p class="text-white/60 max-w-sm mx-auto">
+                        Choose a mood from the left, or describe your activity in your own words.
+                    </p>
+                    <div class="mt-6 flex flex-wrap gap-2 justify-center text-xs">
+                        <span class="example-chip">cramming for calc final</span>
+                        <span class="example-chip">deep coding sprint</span>
+                        <span class="example-chip">gym workout</span>
+                        <span class="example-chip">winding down</span>
+                    </div>
                 </div>
-            </div>
+
+                <div id="results-container" class="hidden space-y-5">
+                    <!-- Intent banner -->
+                    <div id="intent-banner" class="hidden"></div>
+
+                    <!-- Recommendations Cards -->
+                    <div id="recommendations-list" class="space-y-3"></div>
+
+                    <!-- Pipeline Steps (collapsible) -->
+                    <div class="glass-card overflow-hidden">
+                        <button id="pipeline-toggle" class="w-full flex items-center justify-between p-5 hover:bg-white/5 transition">
+                            <span class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                                    <span class="text-base">📊</span>
+                                </span>
+                                <span class="text-left">
+                                    <span class="block text-base font-bold text-white">Pipeline Trace</span>
+                                    <span class="block text-xs text-white/50">5 observable steps · transparent reasoning</span>
+                                </span>
+                            </span>
+                            <span id="pipeline-chevron" class="text-white/60 text-lg transition-transform">▼</span>
+                        </button>
+                        <div id="pipeline-details" class="hidden border-t border-white/10 p-5 space-y-3"></div>
+                    </div>
+
+                    <!-- Error message (if any) -->
+                    <div id="error-message" class="hidden error-box"></div>
+                </div>
+            </main>
         </div>
+
+        <footer class="mt-16 mb-6 text-center">
+            <p class="text-white/40 text-xs">
+                Built on VibeMatcher 2.0 · Last.fm + CSV catalog · No LLM dependency
+            </p>
+        </footer>
     </div>
 
     <!-- Pass sections data to JavaScript -->
