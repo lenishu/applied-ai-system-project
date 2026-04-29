@@ -1,0 +1,42 @@
+3pts	Clear Identification of the Base Project and Its Original Scope
+1	Student identifies the original project they are extending.
+1	Student provides a short description of the original system's goal and capabilities.
+1	Description is accurate and sets clear context for extensions.
+3pts	Substantial New AI Feature Added
+1	Student adds at least one substantial AI feature such as RAG, a multi-step agent or planning workflow, specialized behavior (mini fine-tune or structured prompting), or a reliability harness (evaluation loop, guardrails, self-checking).
+1	Feature is integrated into the working system (not an isolated demo).
+1	Feature is functional and produces meaningful changes in system behavior.
+3pts	System Architecture Diagram
+1	Diagram shows major components (UI/CLI, retrieval, agent, evaluator, database, etc.).
+1	Diagram clearly illustrates data flow (input → processing steps → output).
+1	Diagram matches actual project implementation (not theoretical).
+3pts	Functional End-to-End System Demonstration
+1	Student provides a working script or UI that demonstrates full system workflow.
+1	System runs end-to-end using the new AI feature.
+1	System responds consistently to at least 2-3 example inputs.
+3pts	Reliability, Evaluation, or Guardrail Component
+1	System includes a reliability mechanism such as input validation, output guardrails, self-critique or multi-model agreement, or an evaluation script that tests sample inputs.
+1	Mechanism is functional and meaningfully improves reliability.
+1	Student provides examples demonstrating how the guardrail/evaluator behaves.
+3pts	Documentation: README and Setup Instructions
+1	README clearly explains project goals and new features.
+1	README contains step-by-step instructions to install, run, and test the system.
+1	README includes sample input/output illustrating system behavior.
+3pts	Reflection on AI Collaboration and System Design
+1	Student explains how they used AI during development (prompting, debugging, design).
+1	Student identifies at least one helpful and one flawed AI suggestion.
+1	Student reflects on system limitations and future improvements.
+Stretch Features
++2pts	RAG Enhancement: Custom Indexing or Multi-Source Retrieval
+Retrieval is extended to include custom documents, sections, or multi-source retrieval.
+The impact on output quality is demonstrated.
++2pts	Agentic Workflow Enhancement
+Multi-step reasoning with tool-calls, planning steps, or a decision-making chain is implemented.
+The agent's intermediate steps are observable in output.
++2pts	Fine-Tuning or Specialization Behavior
+Specialized model behavior (few-shot patterns, synthetic datasets, or constrained tone/style) is demonstrated.
+Output measurably differs from baseline responses.
++2pts	Test Harness or Evaluation Script
+A script that evaluates the system on multiple predefined inputs is built and runs successfully.
+The script prints a summary of results (pass/fail score, confidence, or similar).
+

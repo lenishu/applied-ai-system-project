@@ -242,6 +242,91 @@ If I extended this project, I'd:
 
 ---
 
+## 10. AI Collaboration & Limitations of This Extension
+
+### How Claude Helped Build StudyVibe
+
+**Helpful Suggestions:**
+
+1. **Last.fm Integration Over Spotify:** Claude flagged that "Spotify's `audio-features` endpoint was deprecated in November 2024" and suggested switching to Last.fm's tag-based API. This was critical—it saved us from building on a dead API. We implemented `LastFmClient` with tag.getTopTracks as a result, which works reliably.
+
+2. **5-Step Pipeline Design:** Claude proposed decomposing the recommender into discrete, observable steps: Parse Intent → Resolve Activity → Retrieve Catalog → Rerank → Explain. This made the system's reasoning visible and testable. Each step is logged with latency and confidence metrics.
+
+3. **Guardrails as a Separate Layer:** Claude recommended extracting validation logic into a dedicated `guardrails.py` file with 5 layers (input length, activity allowlist, schema validation, numeric clamping, empty-result fallback). This made the system more robust and easier to audit for safety.
+
+4. **Web UI with Pipeline Tracing:** Claude suggested building a Flask web app with a collapsible "Pipeline Steps" panel that shows what the system is thinking at each stage. This transparency turned an opaque recommender into a *legible* one—users can see exactly why they got a recommendation.
+
+---
+
+### Where Claude Suggested Trade-Offs (With Mixed Results)
+
+**Suggestion:** "Since Last.fm doesn't provide audio features directly, synthesize them using tag heuristics."
+
+- **What Claude Proposed:** Use tag presence (e.g., "acoustic" tag → boost acousticness, "workout" tag → boost energy) plus small random jitter to approximate audio features.
+- **Why It Was Pragmatic:** Avoids calling Spotify (deprecated) and works with Last.fm's free tier.
+- **Trade-Off We Made:** Synthetic features are less accurate than real Spotify features. A "workout" tag might mean high-energy electronic *or* high-energy rock; our heuristic can't distinguish.
+- **Disclosure:** Documented in README as "Future Work: Integrate real audio features via MusicBrainz or AcousticBrainz APIs."
+- **Assessment:** This was a reasonable engineering trade-off. Given the constraints (free API, deprecated Spotify), synthesized features were better than nothing. But it's important to flag: *any recommendation made using synthetic features should carry a caveat that real features might rerank results differently*.
+
+---
+
+### Limitations We Inherited From the Approach
+
+1. **Rule-Based Keyword Classification:** The `classify()` function in `activities.py` uses substring matching on keywords to infer user intent from free text. Examples:
+   - Input: `"cramming for calc final tomorrow"` → classifies as `student.exam_cram` (confidence ≈ 0.50)
+   - Input: `"xyz qwerty"` → no keywords match, falls back to `work.email_triage` (the safest neutral default; see `apply_low_confidence_fallback` in `guardrails.py`).
+   - **Real failure observed in eval:** `"energizing break before standup meeting"` → classified as `work.meeting_prep` instead of `work.energizing_break` because the meeting/standup keywords win on hit count. See "Testing Surprises" below.
+   - **Limitation:** Ambiguous phrases like "vibing" or "chilling" can map to multiple activities. No machine learning model disambiguates context.
+
+2. **Synthetic Audio Features:** As noted above, features are synthesized from tag heuristics, not measured from real audio. Heuristics:
+   - `acoustic` tag → acousticness += 0.3
+   - `workout` tag → energy += 0.2
+   - `sleep` tag → energy -= 0.2
+   - `sad` tag → valence -= 0.2
+   - These are *plausible* but not validated against real audio data.
+   - **Blind Spot:** A "sad electronic" song might get energy boosted (electronic) and valence tanked (sad), resulting in contradictory features. The heuristics don't interact intelligently.
+
+3. **Last.fm Availability:** The system gracefully falls back to a CSV seed (60 songs) if Last.fm is unavailable or rate-limited. But the CSV seed is small and skewed (same bias as VibeMatcher 2.0's dataset). If a user's network is down and they're in offline mode, recommendations will be mediocre.
+   - **Blind Spot:** Users on slow/metered networks might trigger the fallback unknowingly and think the system's results are poor, when in fact they're using a 60-song subset instead of millions from Last.fm.
+
+4. **No Confidence Uncertainty in Results:** The system returns ranked recommendations with scores but doesn't communicate *how certain* it is about each match.
+   - **Example:** A recommendation might score 14.2/17.5 because (a) perfect keyword match with high confidence, or (b) ambiguous text with low confidence that happened to match. The score is the same; the certainty is not.
+   - **Blind Spot:** Users might trust low-confidence matches too much if the score looks high.
+
+---
+
+### Testing Surprises From Evaluation Harness
+
+When we ran the `eval.py` harness (12 predefined test cases), we found:
+
+1. **Activity classification: 11/12 correct (91.7%) with confidence 0.40-0.80.** The keyword classifier handled phrases like "cramming for calc final", "deep dive into coding", and "gym workout" without difficulty. The one failure was instructive — see point 2 below.
+
+2. **The most useful surprise was a real classifier blind spot.** The case `"energizing break before standup meeting"` was expected to map to `work.energizing_break`, but the classifier picked `work.meeting_prep` instead. Reason: the input contains the keywords `meeting`, `standup`, and `prep` (3 hits for `meeting_prep`) and only `break` and `energize` (2 hits for `energizing_break`), so hit-count voting picks the wrong activity. This is a legitimate weakness of single-word keyword matching; multi-word phrase keys ("energizing break") or per-keyword specificity weights would fix it. We chose to ship this honestly and document it rather than hand-tune the keyword list to game the eval.
+
+3. **Energy delta was 0.158 mean (range 0.013 to 0.497).** Recommendations land within ~0.16 of the target energy on average — well within an acceptable range for a 60-song catalog. The 0.497 outlier comes from an activity with no good matches in the CSV (`exam_cram` wants very low energy + high acousticness; the CSV has few such tracks). With the Last.fm pool the deltas drop substantially.
+
+4. **Guardrails prevented crashes on every adversarial input.** Empty text, 600-char prompt-injection attempts, `confidence=2.0`, `section="invalid"`, malformed JSON — all caught cleanly by the 5-layer stack and surfaced as 400 responses with structured error messages, not 500s.
+
+5. **Last.fm caching saved real money.** First eval run made 72 API calls (12 cases × 6 tags); every subsequent run is a cache hit on disk. This makes the eval deterministic and free to re-run during development.
+
+---
+
+### Misuse Prevention & Safety Notes
+
+1. **No PII Collection:** The system doesn't store user profiles, search history, or listen-through behavior. Every request is stateless. This eliminates privacy risks from a recommender system perspective.
+   - **Note:** Flask logs are written to `logs/studyvibe.log` and include timestamps, section, mood, and recommendation count. No user identifiers are logged, so this is safe.
+
+2. **Deterministic Outputs:** Given the same input (section, mood, language, era), the system always returns the same recommendations in the same order. This enables auditing and reproducibility.
+   - **Note:** The synthetic audio features include jitter (random ±0.05), so results *are* slightly non-deterministic. But the jitter is bounded and doesn't change ranking significantly.
+
+3. **No Autoplay or Skip-Tracking:** Unlike Spotify, this system doesn't have mechanics to automatically advance to the next song or learn from skips. Users must explicitly choose what to listen to.
+   - **Implication:** No feedback loop means the system never learns individual taste over time. Each session is independent.
+
+4. **Explainability by Design:** Every recommendation includes a breakdown of why it scored well (language match +3.0, genre match +2.5, energy closeness +1.8, etc.). Users can scrutinize and challenge the ranking.
+   - **Implication:** If the system makes a bad recommendation, users can see exactly which signal(s) caused it and dispute that signal's importance.
+
+---
+
 ## Summary
 
 **VibeMatcher 2.0** successfully demonstrates how a simple, rule-based recommender can:

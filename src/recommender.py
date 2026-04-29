@@ -18,9 +18,9 @@ class Song:
     valence: float
     danceability: float
     acousticness: float
-    instrumentalness: float
-    language: str
-    era: str
+    instrumentalness: float = 0.0
+    language: str = "English"
+    era: str = "2026"
 
 @dataclass
 class UserProfile:
@@ -32,11 +32,11 @@ class UserProfile:
     favorite_mood: str
     target_energy: float
     likes_acoustic: bool
-    target_valence: float  # 0=sad/dark, 1=happy/bright
-    target_danceability: float  # 0=not danceable, 1=highly danceable
-    target_acousticness: float  # 0=electric, 1=acoustic
-    preferred_language: str
-    preferred_era: str
+    target_valence: float = 0.5  # 0=sad/dark, 1=happy/bright
+    target_danceability: float = 0.5  # 0=not danceable, 1=highly danceable
+    target_acousticness: float = 0.5  # 0=electric, 1=acoustic
+    preferred_language: str = "English"
+    preferred_era: str = "2026"
 
 class Recommender:
     """
@@ -70,6 +70,7 @@ class Recommender:
                 "genre": s.genre,
                 "mood": s.mood,
                 "energy": s.energy,
+                "tempo_bpm": s.tempo_bpm,
                 "valence": s.valence,
                 "danceability": s.danceability,
                 "acousticness": s.acousticness,
@@ -83,8 +84,25 @@ class Recommender:
         # Use the functional scorer
         recommendations = recommend_songs(user_dict, songs_dicts, k)
 
-        # Return only the Song objects
-        return [s for s, _, _ in recommendations]
+        # Convert ranked dicts back to Song objects for the test contract.
+        return [
+            Song(
+                id=s["id"],
+                title=s["title"],
+                artist=s["artist"],
+                genre=s["genre"],
+                mood=s["mood"],
+                energy=s["energy"],
+                tempo_bpm=s["tempo_bpm"],
+                valence=s["valence"],
+                danceability=s["danceability"],
+                acousticness=s["acousticness"],
+                instrumentalness=s.get("instrumentalness", 0.0),
+                language=s.get("language", "English"),
+                era=s.get("era", "2026"),
+            )
+            for s, _, _ in recommendations
+        ]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
         """
@@ -195,21 +213,29 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
 
     # CATEGORICAL PREFERENCES - Medium weight
 
-    # Genre match
-    if song["genre"].lower() == user_prefs["favorite_genre"].lower():
+    # Genre match (skip if either side is None / unset)
+    pref_genre = user_prefs.get("favorite_genre")
+    song_genre = song.get("genre")
+    if pref_genre and song_genre and song_genre.lower() == pref_genre.lower():
         score += 2.5
-        reasons.append(f"[MATCH] Genre ({song['genre']})")
+        reasons.append(f"[MATCH] Genre ({song_genre})")
+    elif pref_genre is None:
+        reasons.append("[SKIP] Genre (no preference)")
     else:
         score -= 0.2
-        reasons.append(f"[MISMATCH] Genre")
+        reasons.append("[MISMATCH] Genre")
 
-    # Mood match
-    if song["mood"].lower() == user_prefs["favorite_mood"].lower():
+    # Mood match (skip if either side is None / unset)
+    pref_mood = user_prefs.get("favorite_mood")
+    song_mood = song.get("mood")
+    if pref_mood and song_mood and song_mood.lower() == pref_mood.lower():
         score += 2.0
-        reasons.append(f"[MATCH] Mood ({song['mood']})")
+        reasons.append(f"[MATCH] Mood ({song_mood})")
+    elif pref_mood is None:
+        reasons.append("[SKIP] Mood (no preference)")
     else:
         score -= 0.1
-        reasons.append(f"[MISMATCH] Mood")
+        reasons.append("[MISMATCH] Mood")
 
     # NUMERICAL FEATURES - Distance-based scoring (closer to target = higher score)
     # Scoring formula: 1 - |feature_value - target_value| = reward for proximity

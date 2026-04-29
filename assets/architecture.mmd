@@ -1,0 +1,25 @@
+graph TD
+    A["🌐 Web UI<br/>(Flask + Tailwind)"] -->|User Input| B["📊 Pipeline Orchestrator<br/>(src/agent.py)"]
+    
+    B -->|Step 1| C["🔍 Parse Intent<br/>Keyword Classifier"]
+    C -->|confidence score| D["✓ Guardrails<br/>(5-layer validation)"]
+    
+    D -->|Step 2| E["⚙️ Resolve Activity<br/>Activity Profile Lookup"]
+    E -->|user_prefs dict| F["🎯 Audio Targets<br/>(src/activities.py)"]
+    
+    F -->|Step 3| G["📀 Retrieve Catalog<br/>Last.fm + CSV"]
+    G -->|Last.fm API| H["🔄 Disk Cache<br/>(data/cache/lastfm/)"]
+    H -->|fallback| I["💾 CSV Seed<br/>(data/songs.csv)"]
+    
+    G -->|candidates list| J["Step 4: Rerank<br/>(recommend_songs)"]
+    J -->|existing scorer| K["📋 Score Songs<br/>(src/recommender.py)"]
+    K -->|ranked results| L["Step 5: Explain<br/>Templated Explanations"]
+    
+    L -->|final output| M["✨ Results Panel<br/>Top 5 + Pipeline Trace"]
+    M -->|logs| N["📝 Logging<br/>(logs/studyvibe.log)"]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff3e0
+    style D fill:#f3e5f5
+    style M fill:#e8f5e9
+    style N fill:#fce4ec
